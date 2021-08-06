@@ -1,0 +1,79 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CH06CHALLENGE.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+
+       SELECT BASEBALL ASSIGN TO "BASEBALL2016.NEW"
+           ORGANIZATION IS LINE SEQUENTIAL.
+
+       SELECT BASEBALLIDX ASSIGN TO "BASEBALLIDX.DAT"
+           FILE STATUS IS FILE-CHECK-KEY
+           ORGANIZATION IS INDEXED
+           ACCESS MODE IS RANDOM
+           RECORD KEY IS GAMEID
+           ALTERNATE RECORD KEY IS GAMEDATE
+               WITH DUPLICATES.
+
+       DATA DIVISION.
+       FILE SECTION.
+       FD BASEBALLIDX.
+       01 BASEBALLGAMEIDX.
+           05 GAMEID           PIC X(36).
+           05 GAMEYEAR         PIC 9(4).
+           05 GAMEDATE         PIC X(10).
+           05 GAMETIME         PIC X(13).
+           05 GAMEATTENDANCE   PIC X(5).
+           05 GAMEHOMETEAM     PIC X(12).
+           05 GAMEAWAYTEAM     PIC X(12).
+           05 GAMEMOREINFO     PIC X(35).
+
+       FD BASEBALL.
+       01 BASEBALLGAME.
+           88 ENDOFFILE    VALUE HIGH-VALUES.
+           05 GAMEID16           PIC X(36).
+           05 GAMEYEAR16         PIC 9(4).
+           05 GAMEDATE16         PIC X(10).
+           05 GAMETIME16         PIC X(13).
+           05 GAMEATTENDANCE16   PIC X(5).
+           05 GAMEHOMETEAM16     PIC X(12).
+           05 GAMEAWAYTEAM16     PIC X(12).
+           05 GAMEMOREINFO16     PIC X(35).
+
+       WORKING-STORAGE SECTION.
+       01  WS-WORKING-STORAGE.
+           05 FILLER           PIC X(27) VALUE
+               'WORKING STORAGE STARTS HERE'.
+
+       01  WS-WORK-AREAS.
+           05 FILE-CHECK-KEY   PIC X(2).
+
+       PROCEDURE DIVISION.
+       0100-READ-GAMES.
+           OPEN INPUT BASEBALL.
+           OPEN OUTPUT BASEBALLIDX.
+
+           READ BASEBALL
+               AT END SET ENDOFFILE TO TRUE
+           END-READ.
+           PERFORM 0200-PROCESS-FILE UNTIL
+               ENDOFFILE.
+
+           PERFORM 9000-END-PROGRAM.
+       
+       0100-END.
+
+       0200-PROCESS-FILE.
+           WRITE BASEBALLGAMEIDX FROM BASEBALLGAME
+               INVALID KEY DISPLAY
+                   "STATUS = " FILE-CHECK-KEY
+           END-WRITE
+
+           READ BASEBALL
+               AT END SET ENDOFFILE TO TRUE.
+       0200-END.
+
+       9000-END-PROGRAM.
+           CLOSE BASEBALL, BASEBALLIDX.
+           STOP RUN.
+           END PROGRAM CH06CHALLENGE.
